@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Native人才积分机制</title>
+    <style>
+        :root {
+            --klein-blue: #002FA7;
+            --klein-blue-light: #2046B3;
+            --klein-blue-dark: #001F73;
+            --accent-color: #00E4FF;
+            --text-primary: #333;
+            --text-secondary: #5a6c7d;
+            --bg-color: #f5f8ff;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --section-bg: rgba(0, 47, 167, 0.03);
+            --card-bg: #ffffff;
+            --border-color: rgba(0, 47, 167, 0.1);
+            --shadow: 0 10px 30px rgba(0, 47, 167, 0.10);
+            --shadow-hover: 0 16px 40px rgba(0, 47, 167, 0.16);
+            --radius: 15px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            font-size: 16px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--klein-blue), var(--klein-blue-dark));
+            color: white;
+            padding: 60px 0 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 0 24px;
+        }
+
+        .header-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.12;
+        }
+
+        .header-bg .grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+
+        .title-main {
+            color: #fff;
+            font-size: 3.2rem;
+            margin-bottom: 18px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.18);
+            letter-spacing: 1px;
+        }
+
+        .title-sub {
+            color: #f0f4ff;
+            font-size: 1.6rem;
+            margin-bottom: 36px;
+            font-weight: 500;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.12);
+            white-space: nowrap;
+        }
+
+        .tabs-container {
+            margin-bottom: 40px;
+        }
+        .tabs-nav {
+            display: flex;
+            background: var(--card-bg);
+            border-radius: var(--radius) var(--radius) 0 0;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+        }
+        .tab-button {
+            padding: 16px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            position: relative;
+        }
+        .tab-button:hover {
+            background: rgba(0, 47, 167, 0.05);
+        }
+        .tab-button.active {
+            color: var(--klein-blue);
+            background: rgba(0, 47, 167, 0.08);
+        }
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent-color);
+        }
+        .tab-content {
+            background: var(--card-bg);
+            border-radius: 0 0 var(--radius) var(--radius);
+            box-shadow: var(--shadow);
+            padding: 32px;
+            min-height: 400px;
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+
+        .content-section {
+            display: none;
+            background: var(--bg-primary);
+            padding: 36px 28px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            margin-bottom: 36px;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(24px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 2.4rem;
+            color: var(--text-primary);
+            margin-bottom: 36px;
+            text-align: center;
+            position: relative;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, var(--klein-blue), var(--klein-blue-light));
+            border-radius: 2px;
+        }
+
+        .subsection {
+            margin-bottom: 40px;
+        }
+
+        .subsection h3 {
+            font-size: 1.8rem;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            padding-left: 24px;
+            border-left: 4px solid var(--klein-blue);
+            font-weight: 600;
+        }
+
+        .subsection h4 {
+            font-size: 1.4rem;
+            color: var(--text-primary);
+            margin-bottom: 18px;
+            margin-top: 32px;
+            font-weight: 600;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            border-left: 4px solid var(--klein-blue);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-6px) scale(1.025);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .level-cards {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin: 36px 0;
+            flex-wrap: wrap;
+        }
+
+        .level-card {
+            background: linear-gradient(135deg, var(--klein-blue) 0%, var(--klein-blue-light) 100%);
+            color: white;
+            padding: 24px 20px;
+            border-radius: var(--radius);
+            text-align: center;
+            box-shadow: var(--shadow-hover);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            flex: 1;
+            min-width: 180px;
+            max-width: 220px;
+        }
+
+        .level-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .level-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 47, 167, 0.25);
+        }
+
+        .level-card h4 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+            color: white;
+        }
+
+        .level-card .score-range {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin: 12px 0;
+            position: relative;
+            z-index: 1;
+            color: white;
+        }
+
+        .level-card .benefits {
+            font-size: 0.85rem;
+            opacity: 0.95;
+            line-height: 1.4;
+            position: relative;
+            z-index: 1;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            word-wrap: break-word;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--klein-blue), var(--klein-blue-light));
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        tr:nth-child(even) {
+            background: #f5f5f5;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, var(--klein-blue), var(--klein-blue-light));
+            color: white;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .dimension-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin: 36px 0;
+        }
+
+        .dimension-card {
+            background: var(--card-bg);
+            padding: 32px 28px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border-top: 4px solid;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .dimension-card:hover {
+            transform: translateY(-6px) scale(1.025);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .dimension-card.learning {
+            border-color: #3498db;
+        }
+
+        .dimension-card.practice {
+            border-color: #e74c3c;
+        }
+
+        .dimension-card.collaboration {
+            border-color: #f39c12;
+        }
+
+        .dimension-card.innovation {
+            border-color: #9b59b6;
+        }
+
+        .dimension-icon {
+            font-size: 2.8rem;
+            margin-bottom: 18px;
+            text-align: center;
+            display: block;
+        }
+
+        .learning .dimension-icon {
+            color: #3498db;
+        }
+
+        .practice .dimension-icon {
+            color: #e74c3c;
+        }
+
+        .collaboration .dimension-icon {
+            color: #f39c12;
+        }
+
+        .innovation .dimension-icon {
+            color: #9b59b6;
+        }
+
+        .dimension-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .dimension-weight {
+            font-size: 2rem;
+            font-weight: 800;
+            text-align: center;
+            margin: 18px 0;
+            color: var(--klein-blue);
+        }
+
+        .dimension-description {
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .classification-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin: 36px 0;
+        }
+
+        .classification-card {
+            background: var(--card-bg);
+            padding: 32px 28px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border-left: 4px solid;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .classification-card:hover {
+            transform: translateY(-6px) scale(1.025);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .classification-card.basic {
+            border-color: #27ae60;
+        }
+
+        .classification-card.project {
+            border-color: #e74c3c;
+        }
+
+        .classification-card.learning {
+            border-color: #3498db;
+        }
+
+        /* 积分兑换商城样式 */
+        .exchange-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 28px;
+            margin: 36px 0;
+        }
+
+        .exchange-item {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 32px 28px;
+            text-align: center;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exchange-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(var(--klein-blue-rgb), 0.03), rgba(var(--klein-blue-light-rgb), 0.03));
+            z-index: -1;
+        }
+
+        .exchange-item:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--klein-blue-light);
+        }
+
+        .exchange-item.special {
+            background: linear-gradient(135deg, rgba(var(--klein-blue-rgb), 0.08), rgba(var(--klein-blue-light-rgb), 0.08));
+            border: 2px solid var(--klein-blue-light);
+        }
+
+        .exchange-item.special::before {
+            background: linear-gradient(135deg, rgba(var(--klein-blue-rgb), 0.08), rgba(var(--klein-blue-light-rgb), 0.08));
+        }
+
+        .exchange-icon {
+            font-size: 3.2rem;
+            margin-bottom: 18px;
+            display: block;
+            color: var(--klein-blue);
+        }
+
+        .exchange-item h4 {
+            color: var(--text-primary);
+            font-size: 1.35rem;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .exchange-points {
+            background: linear-gradient(135deg, var(--klein-blue), var(--klein-blue-light));
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 1.15rem;
+            margin: 12px 0;
+            display: inline-block;
+        }
+
+        .exchange-stock {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .exchange-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 24px;
+            min-height: 44px;
+        }
+
+        .exchange-btn {
+            background: linear-gradient(135deg, var(--klein-blue), var(--klein-blue-light));
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: var(--radius);
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .exchange-btn:hover {
+            background: linear-gradient(135deg, var(--klein-blue-dark), var(--klein-blue));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-small {
+            background: linear-gradient(135deg, var(--klein-blue), var(--klein-blue-light));
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-small:hover {
+            background: linear-gradient(135deg, var(--klein-blue-dark), var(--klein-blue));
+            transform: translateY(-1px);
+        }
+
+        .ul-styled {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .ul-styled li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .ul-styled li::before {
+            content: '•';
+            color: var(--klein-blue);
+            font-weight: 700;
+            position: absolute;
+            left: 0;
+            font-size: 1.2rem;
+        }
+
+        .alert {
+            padding: 18px 24px;
+            border-radius: var(--radius);
+            margin: 18px 0;
+            border-left: 4px solid;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .alert-info {
+            background: rgba(52, 152, 219, 0.1);
+            border-color: #3498db;
+            color: #2980b9;
+        }
+
+        .alert-success {
+            background: rgba(39, 174, 96, 0.1);
+            border-color: #27ae60;
+            color: #229954;
+        }
+
+        .alert-warning {
+            background: rgba(243, 156, 18, 0.1);
+            border-color: #f39c12;
+            color: #d68910;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+
+            .header h1 {
+                font-size: 2.2rem;
+            }
+
+            .tabs-nav {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .tab-button {
+                margin: 0;
+                font-size: 0.85rem;
+                padding: 12px 18px;
+            }
+
+            .level-cards {
+                flex-direction: column;
+                gap: 16px;
+            }
+            
+            .level-card {
+                max-width: none;
+                min-width: auto;
+            }
+            
+            .dimension-grid,
+            .classification-grid,
+            .exchange-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            table {
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 8px 6px;
+            }
+
+            .content-section {
+                padding: 24px 20px;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .subsection h3 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Footer样式 */
+        .footer {
+            background: linear-gradient(135deg, var(--klein-blue-dark), var(--klein-blue));
+            color: white;
+            padding: 36px 0 18px 0;
+            text-align: center;
+            margin-top: 60px;
+        }
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .footer p {
+            margin: 10px 0;
+            color: white;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .footer p:first-child {
+            font-weight: 700;
+            color: white;
+            background-clip: text;
+            font-size: 1.25rem;
+        }
+
+        .footer p:last-child {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-bg">
+            <div class="grid"></div>
+        </div>
+        <div class="header-content">
+            <h1 class="title-main">AI Native人才积分机制</h1>
+            <h2 class="title-sub">通过科学的积分体系，激励员工成长为AI Native人才，推动组织AI转型升级</h2>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="tabs-container">
+            <div class="tabs-nav">
+                <button class="tab-button active" onclick="showSection('overview')">机制概览</button>
+                <button class="tab-button" onclick="showSection('architecture')">体系架构</button>
+                <button class="tab-button" onclick="showSection('levels')">等级体系</button>
+                <button class="tab-button" onclick="showSection('rules')">积分规则与计算</button>
+                <button class="tab-button" onclick="showSection('exchange')">积分兑换</button>
+                <button class="tab-button" onclick="showSection('management')">管理机制</button>
+                <button class="tab-button" onclick="showSection('dashboard')">数据看板</button>
+                <button class="tab-button" onclick="showSection('implementation')">实施路径</button>
+                <button class="tab-button" onclick="showSection('operation')">运营保障与评估</button>
+            </div>
+        </div>
+
+        <!-- 机制概览 -->
+        <div id="overview" class="content-section active">
+            <h2 class="section-title">积分机制设计理念</h2>
+            
+            <div class="subsection">
+                <h3>核心目标</h3>
+                <div class="dimension-grid">
+                    <div class="card">
+                        <h4>🧠 认知提升</h4>
+                        <p>通过积分激励，提升业务同学的AI认知水平</p>
+                    </div>
+                    <div class="card">
+                        <h4>🤝 协同共识</h4>
+                        <p>促进业务与产研在AI场景识别、规划上的深度协作</p>
+                    </div>
+                    <div class="card">
+                        <h4>💪 能力建设</h4>
+                        <p>培养具备AI思维的复合型人才</p>
+                    </div>
+                    <div class="card">
+                        <h4>🌟 文化塑造</h4>
+                        <p>营造AI Native的组织文化氛围</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>设计原则</h3>
+                <div class="card">
+                    <ul class="ul-styled">
+                        <li><strong>可量化</strong>：所有积分项目均可客观衡量</li>
+                        <li><strong>可操作</strong>：积分获取路径清晰，易于执行</li>
+                        <li><strong>可持续</strong>：建立长效激励机制，避免一次性活动</li>
+                        <li><strong>可成长</strong>：积分体系随个人能力提升而进阶</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 体系架构 -->
+        <div id="architecture" class="content-section">
+            <h2 class="section-title">积分体系架构</h2>
+            
+            <div class="alert alert-info">
+                <strong>双重分类体系</strong>：本积分机制采用双重分类体系，既保证了能力评估的科学性，又便于积分的有效管理。
+            </div>
+
+            <div class="subsection">
+                <h3>积分维度划分（按能力领域）</h3>
+                <div class="dimension-grid">
+                    <div class="dimension-card learning">
+                        <div class="dimension-icon">📚</div>
+                        <div class="dimension-title">学习维度</div>
+                        <div class="dimension-weight">30%</div>
+                        <div class="dimension-description">AI基础知识学习、行业案例研究、技术趋势跟踪</div>
+                    </div>
+                    <div class="dimension-card practice">
+                        <div class="dimension-icon">⚡</div>
+                        <div class="dimension-title">实践维度</div>
+                        <div class="dimension-weight">40%</div>
+                        <div class="dimension-description">场景识别与分析、AI项目参与、工具使用熟练度</div>
+                    </div>
+                    <div class="dimension-card collaboration">
+                        <div class="dimension-icon">🤝</div>
+                        <div class="dimension-title">协作维度</div>
+                        <div class="dimension-weight">20%</div>
+                        <div class="dimension-description">跨部门协同、知识分享、团队贡献</div>
+                    </div>
+                    <div class="dimension-card innovation">
+                        <div class="dimension-icon">💡</div>
+                        <div class="dimension-title">创新维度</div>
+                        <div class="dimension-weight">10%</div>
+                        <div class="dimension-description">创新想法提出、最佳实践总结、方法论贡献</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>积分分类划分（按有效期管理）</h3>
+                <div class="classification-grid">
+                    <div class="classification-card basic">
+                        <h4>🟢 基础积分</h4>
+                        <p><strong>定义：</strong>基础能力认证和核心技能积分</p>
+                        <p><strong>有效期：</strong>永久有效</p>
+                        <p><strong>包含内容：</strong>基础学习、基础认证、核心技能应用等</p>
+                        <p><strong>适用范围：</strong>四个维度中的基础性活动均可获得</p>
+                    </div>
+                    <div class="classification-card project">
+                        <h4>🔴 项目积分</h4>
+                        <p><strong>定义：</strong>项目参与和阶段性成果积分</p>
+                        <p><strong>有效期：</strong>2年（到期后50%折算保留）</p>
+                        <p><strong>包含内容：</strong>项目参与、创新贡献、阶段性成果等</p>
+                        <p><strong>适用范围：</strong>主要适用于实践维度和创新维度</p>
+                    </div>
+                    <div class="classification-card learning">
+                        <h4>🔵 学习积分</h4>
+                        <p><strong>定义：</strong>持续学习和能力提升积分</p>
+                        <p><strong>有效期：</strong>1年（到期自动清零）</p>
+                        <p><strong>包含内容：</strong>高级培训、外部学习、技能更新等</p>
+                        <p><strong>适用范围：</strong>主要适用于学习维度和协作维度</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 等级体系 -->
+        <div id="levels" class="content-section">
+            <h2 class="section-title">积分等级体系</h2>
+            
+            <div class="level-cards">
+                <div class="level-card">
+                    <h4>L1 - AI探索者</h4>
+                    <div class="score-range">0-100分</div>
+                    <div class="benefits">
+                        • 基础学习资源访问<br>
+                        • 免费AI学习平台课程<br>
+                        • AI工具使用指南<br>
+                        • 新员工AI入门培训
+                    </div>
+                </div>
+                <div class="level-card">
+                    <h4>L2 - AI实践者</h4>
+                    <div class="score-range">101-300分</div>
+                    <div class="benefits">
+                        • 参与内部分享会<br>
+                        • 获得进阶资源<br>
+                        • 中级AI课程解锁<br>
+                        • AI项目观摩学习
+                    </div>
+                </div>
+                <div class="level-card">
+                    <h4>L3 - AI推动者</h4>
+                    <div class="score-range">301-600分</div>
+                    <div class="benefits">
+                        • 参与场景评估<br>
+                        • 外部培训机会<br>
+                        • AI认证考试支持<br>
+                        • 专家讲座优先参与
+                    </div>
+                </div>
+                <div class="level-card">
+                    <h4>L4 - AI专家</h4>
+                    <div class="score-range">601-1000分</div>
+                    <div class="benefits">
+                        • 担任AI导师<br>
+                        • 参与战略规划<br>
+                        • AI项目决策参与<br>
+                        • 导师津贴奖励
+                    </div>
+                </div>
+                <div class="level-card">
+                    <h4>L5 - AI领袖</h4>
+                    <div class="score-range">1000+分</div>
+                    <div class="benefits">
+                        • AI转型标杆<br>
+                        • 特殊激励奖金<br>
+                        • 晋升优先机会<br>
+                        • 创业项目孵化支持
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 积分规则 -->
+        <div id="rules" class="content-section">
+            <h2 class="section-title">积分获取规则</h2>
+            
+            <div class="subsection">
+                <h3>学习维度积分规则</h3>
+                <h4>基础学习</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>积分项目</th>
+                            <th>分值</th>
+                            <th>积分分类</th>
+                            <th>有效期</th>
+                            <th>审核方式</th>
+                            <th>质量标准</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>AI基础课程学习</td>
+                            <td>5分/课程</td>
+                            <td>基础积分</td>
+                            <td>永久</td>
+                            <td>系统自动</td>
+                            <td>完成度≥80%，通过课程测试</td>
+                        </tr>
+                        <tr>
+                            <td>指定AI文章/报告阅读</td>
+                            <td>2分/篇</td>
+                            <td>基础积分</td>
+                            <td>永久</td>
+                            <td>系统自动</td>
+                            <td>提交不少于200字读后感</td>
+                        </tr>
+                        <tr>
+                            <td>AI相关讲座/webinar参与</td>
+                            <td>3分/次</td>
+                            <td>基础积分</td>
+                            <td>永久</td>
+                            <td>系统自动</td>
+                            <td>全程参与，提交学习笔记</td>
+                        </tr>
+                        <tr>
+                            <td>AI知识测试通过</td>
+                            <td>10分/次</td>
+                            <td>基础积分</td>
+                            <td>永久</td>
+                            <td>系统自动</td>
+                            <td>季度测试，分数≥80分</td>
+                        </tr>
+                        <tr>
+                            <td>AI工具使用教程学习</td>
+                            <td>3分/个</td>
+                            <td>基础积分</td>
+                            <td>永久</td>
+                            <td>系统自动</td>
+                            <td>完成实操练习，提交作品</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>深度学习</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>积分项目</th>
+                            <th>分值</th>
+                            <th>积分分类</th>
+                            <th>有效期</th>
+                            <th>审核方式</th>
+                            <th>质量标准</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>行业AI案例分析报告</td>
+                            <td>10分/份</td>
+                            <td>学习积分</td>
+                            <td>1年</td>
+                            <td>上级确认</td>
+                            <td>不少于2000字，包含问题分析、解决方案、启发思考</td>
+                        </tr>
+                        <tr>
+                            <td>外部AI培训/会议参与</td>
+                            <td>15分/次</td>
+                            <td>学习积分</td>
+                            <td>1年</td>
+                            <td>上级确认</td>
+                            <td>提供参会证明，分享学习成果</td>
+                        </tr>
+                        <tr>
+                            <td>AI相关认证获得</td>
+                            <td>20分/个</td>
+                            <td>基础积分</td>
+                            <td>永久</td>
+                            <td>系统自动</td>
+                            <td>提供官方认证证书</td>
+                        </tr>
+                        <tr>
+                            <td>AI专业书籍精读</td>
+                            <td>8分/本</td>
+                            <td>学习积分</td>
+                            <td>1年</td>
+                            <td>上级确认</td>
+                            <td>提交不少于3000字读书报告</td>
+                        </tr>
+                        <tr>
+                            <td>AI技术论文研读</td>
+                            <td>5分/篇</td>
+                            <td>学习积分</td>
+                            <td>1年</td>
+                            <td>上级确认</td>
+                            <td>核心期刊论文，提交解读报告</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="subsection">
+                <h3>实践维度积分规则</h3>
+                <h4>场景识别与分析</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>积分项目</th>
+                            <th>分值</th>
+                            <th>积分分类</th>
+                            <th>有效期</th>
+                            <th>审核方式</th>
+                            <th>质量标准</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>提出有效AI应用场景</td>
+                            <td>10分/个</td>
+                            <td>项目积分</td>
+                            <td>2年</td>
+                            <td>PC确认</td>
+                            <td>场景描述清晰，具备可行性，符合业务需求</td>
+                        </tr>
+                        <tr>
+                            <td>完成场景可行性分析</td>
+                            <td>15分/份</td>
+                            <td>项目积分</td>
+                            <td>2年</td>
+                            <td>TC确认</td>
+                            <td>包含技术可行性、商业价值、实施难度分析</td>
+                        </tr>
+                        <tr>
+                            <td>使用AI十问模型评估场景</td>
+                            <td>20分/份</td>
+                            <td>项目积分</td>
+                            <td>2年</td>
+                            <td>PC评审</td>
+                            <td>完整回答十个关键问题，评估结果合理</td>
+                        </tr>
+                        <tr>
+                            <td>场景被采纳进入项目池</td>
+                            <td>30分/个</td>
+                            <td>项目积分</td>
+                            <td>2年</td>
+                            <td>MT确认</td>
+                            <td>通过数委员会审核，正式立项</td>
+                        </tr>
+                        <tr>
+                            <td>AI需求调研报告</td>
+                            <td>12分/份</td>
+                            <td>项目积分</td>
+                            <td>2年</td>
+                            <td>PC确认</td>
+                            <td>深入调研用户需求，形成详细需求文档</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>新员工快速上手指南</strong><br>
+                第一周目标：20-30分 | 第一个月目标：达到L1等级（100分） | 前三个月目标：达到L2等级（200-300分）
+            </div>
+            
+            <div class="subsection">
+                <h3>积分维度占比计算</h3>
+                <div class="card">
+                    <h4>维度权重设定</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>积分维度</th>
+                                <th>英文名称</th>
+                                <th>权重占比</th>
+                                <th>设定理由</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>学习维度</td>
+                                <td>Learning</td>
+                                <td>30%</td>
+                                <td>基础能力建设，持续学习是AI能力提升的根本</td>
+                            </tr>
+                            <tr>
+                                <td>实践维度</td>
+                                <td>Practice</td>
+                                <td>40%</td>
+                                <td>核心能力体现，实际应用是AI价值创造的关键</td>
+                            </tr>
+                            <tr>
+                                <td>协作维度</td>
+                                <td>Collaboration</td>
+                                <td>20%</td>
+                                <td>团队协同能力，AI转型需要跨部门协作</td>
+                            </tr>
+                            <tr>
+                                <td>创新维度</td>
+                                <td>Innovation</td>
+                                <td>10%</td>
+                                <td>突破性贡献，鼓励创新思维和方法论总结</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>积分计算公式</h3>
+                <div class="card">
+                    <div class="alert alert-info">
+                        <strong>单维度得分 = 该维度内所有有效积分 × 维度权重</strong><br><br>
+                        <strong>总积分 = 学习维度得分 + 实践维度得分 + 协作维度得分 + 创新维度得分</strong><br><br>
+                        <em>注：计算时先按积分分类筛选有效积分，再按能力维度进行权重计算</em>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>积分有效性管理</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>积分分类</th>
+                            <th>有效期</th>
+                            <th>延期政策</th>
+                            <th>预警时间</th>
+                            <th>过期处理</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>基础积分</td>
+                            <td>永久</td>
+                            <td>永久有效</td>
+                            <td>无</td>
+                            <td>永久保留</td>
+                        </tr>
+                        <tr>
+                            <td>项目积分</td>
+                            <td>2年</td>
+                            <td>不可延期</td>
+                            <td>到期前30天</td>
+                            <td>50%折算保留</td>
+                        </tr>
+                        <tr>
+                            <td>学习积分</td>
+                            <td>1年</td>
+                            <td>认证类积分永久有效</td>
+                            <td>到期前30天</td>
+                            <td>自动清零，不计入总积分</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 积分兑换 -->
+        <div id="exchange" class="content-section">
+            <h2 class="section-title">积分兑换商城</h2>
+            
+            <div class="subsection">
+                <h3>兑换规则说明</h3>
+                <div class="card">
+                    <div class="highlight">
+                        <strong>兑换基本原则</strong>：积分兑换遵循公平、透明、可持续的原则，所有兑换物品均有库存限制和有效期管理。
+                    </div>
+                    <ul class="ul-styled">
+                        <li><strong>积分有效期</strong>：积分自获得之日起12个月内有效，过期自动清零</li>
+                        <li><strong>兑换限制</strong>：每人每月最多兑换3件物品，高价值物品有额外限制</li>
+                        <li><strong>库存管理</strong>：所有兑换物品实时更新库存，先到先得</li>
+                        <li><strong>不可转让</strong>：积分和兑换物品均不可转让给他人</li>
+                        <li><strong>申请流程</strong>：提交兑换申请→系统审核→确认收货→完成兑换</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>兑换商城</h3>
+                <div class="exchange-grid">
+                    <div class="exchange-item">
+                        <div class="exchange-icon">📚</div>
+                        <h4>AI专业书籍</h4>
+                        <div class="exchange-points">200积分</div>
+                        <div class="exchange-stock">库存：15本</div>
+                        <div class="exchange-desc">《深度学习》《机器学习实战》等经典AI书籍</div>
+                        <button class="exchange-btn">立即兑换</button>
+                    </div>
+                    
+                    <div class="exchange-item">
+                        <div class="exchange-icon">🎓</div>
+                        <h4>在线课程账号</h4>
+                        <div class="exchange-points">500积分</div>
+                        <div class="exchange-stock">库存：8个</div>
+                        <div class="exchange-desc">Coursera、edX等平台AI课程年度会员</div>
+                        <button class="exchange-btn">立即兑换</button>
+                    </div>
+                    
+                    <div class="exchange-item">
+                        <div class="exchange-icon">🛠️</div>
+                        <h4>AI工具软件许可</h4>
+                        <div class="exchange-points">800积分</div>
+                        <div class="exchange-stock">库存：5个</div>
+                        <div class="exchange-desc">ChatGPT Plus、Claude Pro等AI工具年度许可</div>
+                        <button class="exchange-btn">立即兑换</button>
+                    </div>
+                    
+                    <div class="exchange-item">
+                        <div class="exchange-icon">🎯</div>
+                        <h4>内部AI工作坊</h4>
+                        <div class="exchange-points">300积分</div>
+                        <div class="exchange-stock">库存：20个</div>
+                        <div class="exchange-desc">公司内部AI专家主讲的实战工作坊参与资格</div>
+                        <button class="exchange-btn">立即兑换</button>
+                    </div>
+                    
+                    <div class="exchange-item">
+                        <div class="exchange-icon">🌐</div>
+                        <h4>外部AI会议</h4>
+                        <div class="exchange-points">1200积分</div>
+                        <div class="exchange-stock">库存：3个</div>
+                        <div class="exchange-desc">NeurIPS、ICML等顶级AI会议参会资格</div>
+                        <button class="exchange-btn">立即兑换</button>
+                    </div>
+                    
+                    <div class="exchange-item">
+                        <div class="exchange-icon">✈️</div>
+                        <h4>海外AI研修</h4>
+                        <div class="exchange-points">3000积分</div>
+                        <div class="exchange-stock">库存：1个</div>
+                        <div class="exchange-desc">硅谷AI公司实地研修机会（7天）</div>
+                        <button class="exchange-btn">立即兑换</button>
+                    </div>
+                    
+                    <div class="exchange-item special">
+                        <div class="exchange-icon">🏆</div>
+                        <h4>季度AI之星</h4>
+                        <div class="exchange-points">1500积分</div>
+                        <div class="exchange-stock">库存：1个</div>
+                        <div class="exchange-desc">季度AI之星称号+现金奖励5000元</div>
+                        <button class="exchange-btn">立即兑换</button>
+                    </div>
+                    
+                    <div class="exchange-item special">
+                        <div class="exchange-icon">👑</div>
+                        <h4>年度AI专家</h4>
+                        <div class="exchange-points">5000积分</div>
+                        <div class="exchange-stock">库存：1个</div>
+                        <div class="exchange-desc">年度AI专家称号+现金奖励20000元</div>
+                        <button class="exchange-btn">立即兑换</button>
+                    </div>
+                    
+                    <div class="exchange-item special">
+                        <div class="exchange-icon">💎</div>
+                        <h4>AI创新大奖</h4>
+                        <div class="exchange-points">8000积分</div>
+                        <div class="exchange-stock">库存：1个</div>
+                        <div class="exchange-desc">AI创新大奖+现金奖励50000元+股权激励</div>
+                        <button class="exchange-btn">立即兑换</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>兑换流程</h3>
+                <div class="dimension-grid">
+                    <div class="card">
+                        <h4>📝 第一步：提交申请</h4>
+                        <p>在兑换商城选择心仪物品，点击"立即兑换"按钮</p>
+                        <ul class="ul-styled">
+                            <li>确认积分余额充足</li>
+                            <li>填写收货信息（实物商品）</li>
+                            <li>提交兑换申请</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>🔍 第二步：系统审核</h4>
+                        <p>系统自动验证积分余额和库存状态</p>
+                        <ul class="ul-styled">
+                            <li>积分余额验证</li>
+                            <li>库存状态检查</li>
+                            <li>兑换资格确认</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>📦 第三步：执行兑换</h4>
+                        <p>审核通过后，扣除相应积分并安排发货</p>
+                        <ul class="ul-styled">
+                            <li>积分自动扣除</li>
+                            <li>生成兑换记录</li>
+                            <li>安排物品发放</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>✅第四步：确认收货</h4>
+                        <p>收到兑换物品后，在系统中确认收货</p>
+                        <ul class="ul-styled">
+                            <li>确认收货状态</li>
+                            <li>评价兑换体验</li>
+                            <li>完成兑换流程</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>动态兑换机制</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>时间周期</th>
+                            <th>特殊兑换活动</th>
+                            <th>折扣力度</th>
+                            <th>限定物品</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>学习季（3-5月）</td>
+                            <td>知识充电节</td>
+                            <td>书籍课程8折</td>
+                            <td>AI学习资源包</td>
+                        </tr>
+                        <tr>
+                            <td>创新季（6-8月）</td>
+                            <td>创新挑战赛</td>
+                            <td>工具软件7折</td>
+                            <td>创新项目孵化基金</td>
+                        </tr>
+                        <tr>
+                            <td>协作季（9-11月）</td>
+                            <td>团队协作月</td>
+                            <td>团队活动6折</td>
+                            <td>团队建设专项基金</td>
+                        </tr>
+                        <tr>
+                            <td>总结季（12-2月）</td>
+                            <td>年度盛典</td>
+                            <td>荣誉奖项9折</td>
+                            <td>年度表彰专属礼品</td>
+                        </tr>
+                        <tr>
+                            <td>学习日（每月15日）</td>
+                            <td>知识分享日</td>
+                            <td>全场9折</td>
+                            <td>限时闪购商品</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="subsection">
+                <h3>我的兑换记录</h3>
+                <div class="card">
+                    <div class="highlight">
+                        <strong>当前积分余额</strong>：1,250分 | <strong>本月已兑换</strong>：2件 | <strong>剩余兑换次数</strong>：1次
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>兑换时间</th>
+                                <th>兑换物品</th>
+                                <th>消耗积分</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2024-01-15</td>
+                                <td>AI专业书籍《深度学习》</td>
+                                <td>200</td>
+                                <td><span style="color: #28a745;">已收货</span></td>
+                                <td><button class="btn-small">评价</button></td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-10</td>
+                                <td>内部AI工作坊参与资格</td>
+                                <td>300</td>
+                                <td><span style="color: #007bff;">已参与</span></td>
+                                <td><button class="btn-small">查看</button></td>
+                            </tr>
+                            <tr>
+                                <td>2023-12-20</td>
+                                <td>ChatGPT Plus年度许可</td>
+                                <td>800</td>
+                                <td><span style="color: #28a745;">使用中</span></td>
+                                <td><button class="btn-small">续费</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- 管理机制 -->
+        <div id="management" class="content-section">
+            <h2 class="section-title">积分管理机制</h2>
+            
+            <div class="subsection">
+                <h3>积分认定流程</h3>
+                <div class="card">
+                    <h4>标准认定流程</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>流程阶段</th>
+                                <th>操作内容</th>
+                                <th>责任人</th>
+                                <th>处理时限</th>
+                                <th>审核标准</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>自主申报</td>
+                                <td>员工在积分系统中提交积分申请</td>
+                                <td>申请人</td>
+                                <td>随时</td>
+                                <td>材料完整性</td>
+                            </tr>
+                            <tr>
+                                <td>材料审核</td>
+                                <td>系统自动检查必要证明材料</td>
+                                <td>系统自动</td>
+                                <td>实时</td>
+                                <td>完整性、有效性</td>
+                            </tr>
+                            <tr>
+                                <td>初步审核</td>
+                                <td>系统自动审核可量化指标</td>
+                                <td>系统+上级</td>
+                                <td>1个工作日</td>
+                                <td>量化标准+主观评估</td>
+                            </tr>
+                            <tr>
+                                <td>专家评审</td>
+                                <td>高分值项目（≥30分）需专家评审</td>
+                                <td>AI专家委员会</td>
+                                <td>3个工作日</td>
+                                <td>专业水平、贡献度</td>
+                            </tr>
+                            <tr>
+                                <td>积分发放</td>
+                                <td>审核通过后系统自动发放积分</td>
+                                <td>系统自动</td>
+                                <td>实时</td>
+                                <td>无</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="subsection">
+                <h3>积分申请操作指南</h3>
+                <div class="card">
+                    <h4>必要材料清单</h4>
+                    <ul class="ul-styled">
+                        <li><strong>学习积分</strong>：课程完成截图、证书照片、读后感文档</li>
+                        <li><strong>实践积分</strong>：项目文档、工作成果、上级确认邮件</li>
+                        <li><strong>协作积分</strong>：分享PPT、活动照片、参与者反馈</li>
+                        <li><strong>创新积分</strong>：创新方案文档、专家评审意见、实施效果证明</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>重要提醒</strong>：整体流程不超过5个工作日，特殊项目最长10天。建议提前准备相关材料，确保申请流程顺畅。</div>
+            </div>
+        </div>
+
+        <!-- 数据看板 -->
+        <div id="dashboard" class="content-section">
+            <h2 class="section-title">积分机制数据看板</h2>
+            
+            <div class="subsection">
+                <h3>整体参与情况</h3>
+                <div class="dimension-grid">
+                    <div class="card">
+                        <h4>1,247</h4>
+                        <p>总参与人数</p>
+                    </div>
+                    <div class="card">
+                        <h4>85%</h4>
+                        <p>活跃参与率</p>
+                    </div>
+                    <div class="card">
+                        <h4>156,890</h4>
+                        <p>累计积分总数</p>
+                    </div>
+                    <div class="card">
+                        <h4>2,341</h4>
+                        <p>本月新增积分</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>等级分布情况</h3>
+                <div class="level-cards">
+                    <div class="level-card">
+                        <h4>L1 AI探索者</h4>
+                        <div class="score-range">623人</div>
+                        <div class="benefits">占比50%</div>
+                    </div>
+                    <div class="level-card">
+                        <h4>L2 AI实践者</h4>
+                        <div class="score-range">374人</div>
+                        <div class="benefits">占比30%</div>
+                    </div>
+                    <div class="level-card">
+                        <h4>L3 AI推动者</h4>
+                        <div class="score-range">187人</div>
+                        <div class="benefits">占比15%</div>
+                    </div>
+                    <div class="level-card">
+                        <h4>L4 AI专家</h4>
+                        <div class="score-range">49人</div>
+                        <div class="benefits">占比4%</div>
+                    </div>
+                    <div class="level-card">
+                        <h4>L5 AI领袖</h4>
+                        <div class="score-range">14人</div>
+                        <div class="benefits">占比1%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>维度积分分布</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>积分维度</th>
+                            <th>总积分数</th>
+                            <th>占比</th>
+                            <th>平均分值</th>
+                            <th>参与人数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>学习维度</td>
+                            <td>47,067</td>
+                            <td>30%</td>
+                            <td>37.8</td>
+                            <td>1,247</td>
+                        </tr>
+                        <tr>
+                            <td>实践维度</td>
+                            <td>62,756</td>
+                            <td>40%</td>
+                            <td>50.3</td>
+                            <td>1,247</td>
+                        </tr>
+                        <tr>
+                            <td>协作维度</td>
+                            <td>31,378</td>
+                            <td>20%</td>
+                            <td>25.2</td>
+                            <td>1,247</td>
+                        </tr>
+                        <tr>
+                            <td>创新维度</td>
+                            <td>15,689</td>
+                            <td>10%</td>
+                            <td>12.6</td>
+                            <td>1,247</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 运营保障 -->
+        <div id="operation" class="content-section">
+            <h2 class="section-title">运营保障机制</h2>
+            
+            <div class="subsection">
+                <h3>组织保障</h3>
+                <div class="dimension-grid">
+                    <div class="card">
+                        <h4>🏛️ AI积分管理委员会</h4>
+                        <p>负责积分体系的整体规划和重大决策</p>
+                        <ul class="ul-styled">
+                            <li>制定积分政策和标准</li>
+                            <li>审议重大积分规则调整</li>
+                            <li>处理积分争议和申诉</li>
+                            <li>定期评估积分体系效果</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>👥 AI专家评审团</h4>
+                        <p>负责高分值项目的专业评审</p>
+                        <ul class="ul-styled">
+                            <li>评审创新项目积分申请</li>
+                            <li>认定AI专利和著作权</li>
+                            <li>审核重大贡献积分</li>
+                            <li>提供专业技术指导</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>⚙️ 积分运营小组</h4>
+                        <p>负责日常积分管理和系统维护</p>
+                        <ul class="ul-styled">
+                            <li>处理日常积分申请</li>
+                            <li>维护积分管理系统</li>
+                            <li>组织积分相关活动</li>
+                            <li>收集用户反馈和建议</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>系统支撑</h3>
+                <div class="dimension-grid">
+                    <div class="card">
+                        <h4>💻 积分管理系统</h4>
+                        <p>自动化积分申请、审核、发放流程，提供完整的积分生命周期管理</p>
+                    </div>
+                    <div class="card">
+                        <h4>📖 学习管理系统</h4>
+                        <p>与积分系统对接，自动记录学习行为和成果，实现学习积分自动发放</p>
+                    </div>
+                    <div class="card">
+                        <h4>📊 数据分析平台</h4>
+                        <p>提供积分数据统计分析，支持决策制定和体系优化</p>
+                    </div>
+                    <div class="card">
+                        <h4>🔔 消息通知系统</h4>
+                        <p>及时推送积分变动、等级提升、活动通知等信息</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="subsection">
+                <h3>效果评估</h3>
+                <div class="card">
+                    <h4>量化指标</h4>
+                    <div class="dimension-grid">
+                        <div class="card">
+                            <h4>📊 参与度指标</h4>
+                            <ul class="ul-styled">
+                                <li>积分系统活跃用户数</li>
+                                <li>积分申请频次</li>
+                                <li>月度新增积分数量</li>
+                                <li>用户登录频率</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h4>🎓 能力指标</h4>
+                            <ul class="ul-styled">
+                                <li>AI知识测试平均分</li>
+                                <li>认证通过率</li>
+                                <li>学习完成率</li>
+                                <li>技能提升幅度</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h4>🤝 协作指标</h4>
+                            <ul class="ul-styled">
+                                <li>跨部门AI项目数量</li>
+                                <li>知识分享频次</li>
+                                <li>团队协作评分</li>
+                                <li>内部培训参与度</li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h4>💡 创新指标</h4>
+                            <ul class="ul-styled">
+                                <li>AI场景识别数量</li>
+                                <li>创新方案采纳率</li>
+                                <li>专利申请数量</li>
+                                <li>最佳实践总结数</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h4>评估时间表</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>评估类型</th>
+                                <th>频率</th>
+                                <th>负责部门</th>
+                                <th>主要内容</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>月度数据分析</td>
+                                <td>每月</td>
+                                <td>积分运营小组</td>
+                                <td>参与度、活跃度、积分分布分析</td>
+                            </tr>
+                            <tr>
+                                <td>季度效果评估</td>
+                                <td>每季度</td>
+                                <td>AI积分管理委员会</td>
+                                <td>量化指标达成情况、问题识别</td>
+                            </tr>
+                            <tr>
+                                <td>半年度深度调研</td>
+                                <td>每半年</td>
+                                <td>HR</td>
+                                <td>员工满意度、能力提升评估</td>
+                            </tr>
+                            <tr>
+                                <td>年度全面评估</td>
+                                <td>每年</td>
+                                <td>AI专家评审团</td>
+                                <td>体系整体效果、战略目标达成</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实施路径 -->
+        <div id="implementation" class="content-section">
+            <h2 class="section-title">实施路径</h2>
+            
+            <div class="subsection">
+                <h3>分阶段实施计划</h3>
+                <div class="dimension-grid">
+                    <div class="card">
+                        <h4>试点阶段（1-2个月）</h4>
+                        <ul class="ul-styled">
+                            <li>完善积分规则和流程</li>
+                            <li>搭建积分管理系统</li>
+                            <li>收集反馈并优化系统</li>
+                            <li>培训试点部门管理员</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>推广阶段（3-6个月）</h4>
+                        <ul class="ul-styled">
+                            <li>全面推广至全中心或其他</li>
+                            <li>开展积分机制宣讲和培训</li>
+                            <li>建立积分运营团队</li>
+                            <li>启动积分兑换商城</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h4>优化阶段（6-12个月）</h4>
+                        <ul class="ul-styled">
+                            <li>根据运营数据优化积分规则</li>
+                            <li>丰富激励措施和兑换选项</li>
+                            <li>建立长效运营机制</li>
+                            <li>与业务发展同步升级</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>© 2025 贝壳找房效率工程中心 AI Native人才积分机制</p>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            // 隐藏所有内容区域
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // 移除所有标签的激活状态
+            const tabs = document.querySelectorAll('.tab-button');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // 显示选中的内容区域
+            document.getElementById(sectionId).classList.add('active');
+
+            // 激活对应的标签
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

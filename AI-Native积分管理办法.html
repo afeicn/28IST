@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI积分管理办法</title>
+    <style>
+        :root {
+            --klein-blue: #002FA7;
+            --klein-blue-light: #2046B3;
+            --klein-blue-dark: #001F73;
+            --accent-color: #00E4FF;
+            --text-color: #333;
+            --bg-color: #f5f8ff;
+            --card-bg: #fff;
+            --section-bg: rgba(0, 47, 167, 0.03);
+            --shadow: 0 10px 30px rgba(0, 47, 167, 0.10);
+            --shadow-hover: 0 16px 40px rgba(0, 47, 167, 0.16);
+            --radius: 15px;
+            --font-main: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-main);
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, var(--klein-blue), var(--klein-blue-dark));
+            color: white;
+            padding: 60px 0 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .header-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 0 24px;
+        }
+        .header-content::before {
+            content: '';
+            position: absolute;
+            left: 0; right: 0; top: 0; bottom: 0;
+            background: linear-gradient(180deg,rgba(0,0,0,0.22),rgba(0,0,0,0.12) 60%,transparent 100%);
+            z-index: -1;
+        }
+        .header-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.12;
+        }
+        .header-bg .grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        .header-bg .circles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        .header-bg .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+        }
+        .circle-1 {
+            width: 320px;
+            height: 320px;
+            top: -100px;
+            right: -60px;
+        }
+        .circle-2 {
+            width: 180px;
+            height: 180px;
+            bottom: -60px;
+            left: 12%;
+        }
+        .title-main {
+            color: #fff;
+            font-size: 3.2rem;
+            margin-bottom: 18px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.18), 0 4px 24px rgba(0,0,0,0.10);
+            letter-spacing: 1px;
+            opacity: 1;
+        }
+        .title-sub {
+            color: #f0f4ff;
+            font-size: 1.6rem;
+            margin-bottom: 36px;
+            font-weight: 500;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 1;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.12);
+        }
+        .framework-box {
+            background-color: rgba(0,0,0,0.18);
+            border-radius: 15px;
+            padding: 24px 32px;
+            margin: 0 auto;
+            display: inline-block;
+            box-shadow: 0 8px 32px rgba(0,47,167,0.10);
+            text-align: left;
+        }
+        .framework-title {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+        .framework-list {
+            color: #fff;
+            font-size: 1.1rem;
+            line-height: 2;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 20px 40px 20px;
+        }
+        .title-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 36px;
+        }
+        .title-bar .accent {
+            width: 8px;
+            height: 40px;
+            background: var(--accent-color);
+            border-radius: 4px;
+            margin-right: 18px;
+        }
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--klein-blue);
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        h2, h3 {
+            color: var(--klein-blue-light);
+            font-weight: 600;
+        }
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+        }
+        h2::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 30px;
+            background-color: var(--accent-color);
+            margin-right: 15px;
+            border-radius: 4px;
+        }
+        h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+        p {
+            line-height: 1.8;
+            margin: 16px 0;
+        }
+        .section {
+            background: var(--section-bg);
+            border-radius: var(--radius);
+            padding: 36px 28px;
+            margin-bottom: 36px;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 36px 28px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            margin-bottom: 30px;
+        }
+        .card:hover {
+            transform: translateY(-6px) scale(1.025);
+            box-shadow: var(--shadow-hover);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        th, td {
+            padding: 14px 18px;
+            text-align: left;
+        }
+        th {
+            background: var(--klein-blue);
+            color: #fff;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background: #f5f5f5;
+        }
+        ul, ol {
+            margin-left: 24px;
+            margin-bottom: 16px;
+        }
+        .highlight {
+            background: rgba(0, 228, 255, 0.1);
+            padding: 20px;
+            border-radius: var(--radius);
+            border-left: 4px solid var(--accent-color);
+            margin: 20px 0;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        .footer-info {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: var(--section-bg);
+            border-radius: var(--radius);
+            border: 1px solid rgba(0, 47, 167, 0.1);
+        }
+        @media (max-width: 900px) {
+            .container {
+                padding: 12px;
+            }
+            .section, .card {
+                padding: 18px 8px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            h2 {
+                font-size: 1.3rem;
+            }
+        }
+        footer {
+            background: linear-gradient(135deg, var(--klein-blue-dark), var(--klein-blue));
+            color: white;
+            padding: 36px 0 18px 0;
+            text-align: center;
+            margin-top: 60px;
+        }
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .copyright {
+            margin-top: 18px;
+            font-size: 0.95rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-bg">
+            <div class="grid"></div>
+            <div class="circles">
+                <div class="circle circle-1"></div>
+                <div class="circle circle-2"></div>
+            </div>
+        </div>
+        <div class="header-content">
+            <h1 class="title-main">AI-Native人才积分管理办法</h1>
+            <p class="title-sub">构建科学的AI人才评价体系，激发创新活力</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="card">
+            <h2>第一章 总则</h2>           
+            <h3>第一条 制定目的</h3>
+            <p>为了建立科学、公正、有效的AI人才培养激励机制，提升员工AI认知水平和应用能力，促进业务与产研协作，培养AI思维复合型人才，营造AI Native组织文化，特制定本办法。</p>
+
+            <h3>第二条 适用范围</h3>
+            <p>本办法适用于效率工程中心员工的AI-Native积分管理工作。</p>
+
+            <h3>第三条 基本原则</h3>
+            <ol>
+                <li><strong>公平公正原则</strong>：积分获取、审核、兑换等环节公开透明，确保公平公正</li>
+                <li><strong>激励导向原则</strong>：通过积分机制激励员工主动学习AI知识，参与AI项目</li>
+                <li><strong>持续改进原则</strong>：根据实际运营情况和业务发展需要，持续优化积分体系</li>
+                <li><strong>价值创造原则</strong>：积分获取与实际价值创造相结合，避免形式主义</li>
+            </ol>
+
+            <h3>第四条 管理目标</h3>
+            <ol>
+                <li>提升员工AI认知水平，培养AI思维</li>
+                <li>促进业务与产研团队在AI项目上的深度协作</li>
+                <li>建立AI人才梯队，形成AI Native组织文化</li>
+                <li>推动AI技术在业务场景中的广泛应用</li>
+            </ol>
+        </div>
+        
+        <div class="card">
+            <h2>第二章 组织架构</h2>
+            
+            <h3>第五条 AI积分管理委员会</h3>
+            <p>设立AI积分管理委员会（AT），负责积分体系的整体规划和重大决策。</p>
+            
+            <div class="highlight">
+                <p><strong>职责：</strong></p>
+                <ol>
+                    <li>制定积分政策和标准</li>
+                    <li>审议重大积分规则调整</li>
+                    <li>处理积分争议和申诉</li>
+                    <li>定期评估积分体系效果</li>
+                </ol>
+                
+                <p><strong>组成：</strong></p>
+                <ul>
+                    <li>AT成员</li>
+                </ul>
+            </div>
+
+            <h3>第六条 AI专家评审团</h3>
+            <p>PC&TC，负责高分值项目（20分以上）的专业评审。</p>
+            
+            <div class="highlight">
+                <p><strong>职责：</strong></p>
+                <ol>
+                    <li>评审创新项目积分申请</li>
+                    <li>认定AI专利和著作权</li>
+                    <li>审核重大贡献积分</li>
+                    <li>提供专业产品、技术指导</li>
+                </ol>
+            </div>
+
+            <h3>第七条 积分运营小组</h3>
+            <p>设立积分运营小组（布道师运营团队），负责日常积分管理和系统维护。</p>
+            
+            <div class="highlight">
+                <p><strong>职责：</strong></p>
+                <ol>
+                    <li>处理日常积分申请</li>
+                    <li>维护积分管理系统</li>
+                    <li>组织积分相关活动</li>
+                    <li>收集用户反馈和建议</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>第三章 积分体系</h2>
+            
+            <h3>第八条 积分维度</h3>
+            <p>积分体系包含四个维度：</p>
+            <ol>
+                <li><strong>学习维度（30%权重）</strong>：AI知识学习和认证</li>
+                <li><strong>实践维度（40%权重）</strong>：AI项目参与和应用</li>
+                <li><strong>协作维度（20%权重）</strong>：跨部门协作和知识分享</li>
+                <li><strong>创新维度（10%权重）</strong>：AI创新和最佳实践</li>
+            </ol>
+
+            <h3>第九条 积分等级</h3>
+            <p>设立五个等级：</p>
+            <ul>
+                <li><strong>L1 AI探索者</strong>（0-199分）：AI认知启蒙阶段</li>
+                <li><strong>L2 AI学习者</strong>（200-499分）：AI知识积累阶段</li>
+                <li><strong>L3 AI实践者</strong>（500-999分）：AI应用实践阶段</li>
+                <li><strong>L4 AI推动者</strong>（1000-1999分）：AI深度应用阶段</li>
+                <li><strong>L5 AI专家</strong>（2000分以上）：AI创新引领阶段</li>
+            </ul>
+
+            <h3>第十条 积分分类</h3>
+            <p>根据有效期划分为三类：</p>
+            <ol>
+                <li><strong>基础积分</strong>：永久有效，包括基础学习、基础认证等</li>
+                <li><strong>项目积分</strong>：2年有效期，到期后按50%折算，包括项目参与、创新贡献等</li>
+                <li><strong>学习积分</strong>：1年有效期，包括高级培训、外部学习等</li>
+            </ol>
+        </div>
+        
+        <div class="card">
+            <h2>第四章 积分获取规则</h2>
+            
+            <h3>第十一条 学习维度积分</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>积分项目</th>
+                            <th>分值</th>
+                            <th>积分类型</th>
+                            <th>有效期</th>
+                            <th>审核方式</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>完成AI基础课程学习</td>
+                            <td>5分/课程</td>
+                            <td>基础积分</td>
+                            <td>永久有效</td>
+                            <td>系统自动</td>
+                        </tr>
+                        <tr>
+                            <td>阅读指定AI文章/报告</td>
+                            <td>2分/篇</td>
+                            <td>学习积分</td>
+                            <td>1年</td>
+                            <td>系统自动</td>
+                        </tr>
+                        <tr>
+                            <td>参加AI相关讲座</td>
+                            <td>3分/次</td>
+                            <td>学习积分</td>
+                            <td>1年</td>
+                            <td>签到确认</td>
+                        </tr>
+                        <tr>
+                            <td>通过AI知识测试</td>
+                            <td>10分/次</td>
+                            <td>学习积分</td>
+                            <td>1年</td>
+                            <td>系统自动</td>
+                        </tr>
+                        <tr>
+                            <td>完成行业案例分析</td>
+                            <td>10分/份</td>
+                            <td>学习积分</td>
+                            <td>1年</td>
+                            <td>专家评审</td>
+                        </tr>
+                        <tr>
+                            <td>获得AI相关认证</td>
+                            <td>20分/个</td>
+                            <td>基础积分</td>
+                            <td>永久有效</td>
+                            <td>证书验证</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>第十二条 实践维度积分</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>积分项目</th>
+                            <th>分值</th>
+                            <th>积分类型</th>
+                            <th>有效期</th>
+                            <th>审核方式</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>提出有效AI应用场景</td>
+                            <td>10分/个</td>
+                            <td>基础积分</td>
+                            <td>永久有效</td>
+                            <td>上级确认</td>
+                        </tr>
+                        <tr>
+                            <td>完成场景可行性分析</td>
+                            <td>15分/份</td>
+                            <td>项目积分</td>
+                            <td>2年(到期50%折算)</td>
+                            <td>专家评审</td>
+                        </tr>
+                        <tr>
+                            <td>使用AI十问模型评估</td>
+                            <td>20分/份</td>
+                            <td>项目积分</td>
+                            <td>2年(到期50%折算)</td>
+                            <td>专家评审</td>
+                        </tr>
+                        <tr>
+                            <td>场景被采纳进入项目池</td>
+                            <td>30分/个</td>
+                            <td>项目积分</td>
+                            <td>2年(到期50%折算)</td>
+                            <td>委员会确认</td>
+                        </tr>
+                        <tr>
+                            <td>参与AI项目需求梳理</td>
+                            <td>20分/项目</td>
+                            <td>项目积分</td>
+                            <td>2年(到期50%折算)</td>
+                            <td>项目经理确认</td>
+                        </tr>
+                        <tr>
+                            <td>担任AI项目业务负责人</td>
+                            <td>40分/项目</td>
+                            <td>项目积分</td>
+                            <td>2年(到期50%折算)</td>
+                            <td>项目验收</td>
+                        </tr>
+                        <tr>
+                            <td>AI项目成功上线</td>
+                            <td>50分/项目</td>
+                            <td>项目积分</td>
+                            <td>2年(到期50%折算)</td>
+                            <td>项目验收</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>第十三条 协作维度积分</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>积分项目</th>
+                            <th>分值</th>
+                            <th>积分类型</th>
+                            <th>有效期</th>
+                            <th>审核方式</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>参与AI知识分享会</td>
+                            <td>5分/次</td>
+                            <td>协作积分</td>
+                            <td>1年</td>
+                            <td>活动签到</td>
+                        </tr>
+                        <tr>
+                            <td>主讲AI技术分享</td>
+                            <td>15分/次</td>
+                            <td>协作积分</td>
+                            <td>1年</td>
+                            <td>组织方确认</td>
+                        </tr>
+                        <tr>
+                            <td>跨部门AI项目协作</td>
+                            <td>20分/项目</td>
+                            <td>协作积分</td>
+                            <td>2年(到期50%折算)</td>
+                            <td>项目经理确认</td>
+                        </tr>
+                        <tr>
+                            <td>AI社区活跃贡献</td>
+                            <td>10分/月</td>
+                            <td>协作积分</td>
+                            <td>1年</td>
+                            <td>社区管理员确认</td>
+                        </tr>
+                        <tr>
+                            <td>指导新人AI学习</td>
+                            <td>8分/人</td>
+                            <td>协作积分</td>
+                            <td>1年</td>
+                            <td>被指导人确认</td>
+                        </tr>
+                        <tr>
+                            <td>组织AI学习小组</td>
+                            <td>25分/期</td>
+                            <td>协作积分</td>
+                            <td>1年</td>
+                            <td>HR部门确认</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>第十四条 创新维度积分</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>积分项目</th>
+                            <th>分值</th>
+                            <th>积分类型</th>
+                            <th>有效期</th>
+                            <th>审核方式</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>提出创新AI思路</td>
+                            <td>15分/个</td>
+                            <td>创新积分</td>
+                            <td>2年(到期50%折算)</td>
+                            <td>专家评审</td>
+                        </tr>
+                        <tr>
+                            <td>总结可复用方法论</td>
+                            <td>25分/份</td>
+                            <td>创新积分</td>
+                            <td>2年(到期50%折算)</td>
+                            <td>专家评审</td>
+                        </tr>
+                        <tr>
+                            <td>创新大赛立项</td>
+                            <td>30分/项</td>
+                            <td>创新积分</td>
+                            <td>2年(到期50%折算)</td>
+                            <td>评审委员会确认</td>
+                        </tr>
+                        <tr>
+                            <td>获得AI专利</td>
+                            <td>50分/项</td>
+                            <td>创新积分</td>
+                            <td>永久有效</td>
+                            <td>专利证书验证</td>
+                        </tr>
+                        <tr>
+                            <td>发表AI相关论文</td>
+                            <td>40分/篇</td>
+                            <td>创新积分</td>
+                            <td>永久有效</td>
+                            <td>期刊确认</td>
+                        </tr>
+                        <tr>
+                            <td>AI工具/平台开发</td>
+                            <td>60分/个</td>
+                            <td>创新积分</td>
+                            <td>2年(到期50%折算)</td>
+                            <td>技术委员会评审</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>第五章 积分管理流程</h2>
+            
+            <h3>第十五条 积分申请流程</h3>
+            <ol>
+                <li><strong>申请提交</strong>：员工通过积分管理系统提交申请</li>
+                <li><strong>初步审核</strong>：积分运营小组进行初步审核</li>
+                <li><strong>专业评审</strong>：高分值项目提交AI专家评审团评审</li>
+                <li><strong>结果公示</strong>：审核结果在系统内公示3个工作日</li>
+                <li><strong>积分发放</strong>：公示期满无异议后正式发放积分</li>
+            </ol>
+
+            <h3>第十六条 积分审核标准</h3>
+            <ol>
+                <li><strong>真实性</strong>：提交材料必须真实有效</li>
+                <li><strong>相关性</strong>：申请项目必须与AI相关</li>
+                <li><strong>价值性</strong>：必须产生实际价值或学习效果</li>
+                <li><strong>时效性</strong>：申请必须在规定时间内提交</li>
+            </ol>
+
+            <h3>第十七条 积分有效期管理</h3>
+            <ol>
+                <li><strong>到期提醒</strong>：系统在积分到期前30天、7天发送提醒</li>
+                <li><strong>延期申请</strong>：特殊情况可申请延期，最长不超过6个月</li>
+                <li><strong>年度审计</strong>：每年12月31日进行积分审计</li>
+                <li><strong>积分清理</strong>：清理无效/过期积分，项目积分折算，学习积分清零</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>第六章 激励机制</h2>
+            
+            <h3>第十八条 物质激励</h3>
+            <ol>
+                <li><strong>现金奖励</strong>：根据积分等级给予现金奖励</li>
+                <li><strong>学习基金</strong>：提供AI学习和培训资金支持</li>
+                <li><strong>设备支持</strong>：优先配置AI相关硬件设备</li>
+            </ol>
+
+            <h3>第十九条 精神激励</h3>
+            <ol>
+                <li><strong>荣誉称号</strong>：授予"AI先锋"、"AI专家"等荣誉称号</li>
+                <li><strong>公开表彰</strong>：在公司内部进行公开表彰</li>
+                <li><strong>证书奖励</strong>：颁发AI积分等级证书</li>
+            </ol>
+
+            <h3>第二十条 平台赋能</h3>
+            <ol>
+                <li><strong>优先参与</strong>：优先参与重要AI项目</li>
+                <li><strong>学习机会</strong>：优先获得高端AI培训机会</li>
+                <li><strong>职业发展</strong>：在晋升评估中给予加分</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>第七章 监督管理</h2>
+            
+            <h3>第二十一条 争议处理</h3>
+            <ol>
+                <li><strong>申诉渠道</strong>：设立积分申诉邮箱和热线</li>
+                <li><strong>处理流程</strong>：5个工作日内给予回复，15个工作日内处理完毕</li>
+                <li><strong>复议机制</strong>：对处理结果不满意可申请复议</li>
+            </ol>
+
+            <h3>第二十二条 违规处理</h3>
+            <p>对于弄虚作假、恶意刷分等违规行为：</p>
+            <ol>
+                <li><strong>警告处理</strong>：首次违规给予警告</li>
+                <li><strong>积分扣除</strong>：扣除相关积分并记录不良记录</li>
+                <li><strong>禁止参与</strong>：严重违规者禁止参与积分活动6-12个月</li>
+                <li><strong>绩效影响</strong>：弄虚作假者取消当年绩效评优资格</li>
+                <li><strong>诚信记录</strong>：违规行为记入个人诚信档案，影响后续评估</li>
+            </ol>
+
+            <h3>第二十三条 审计监督</h3>
+            <ol>
+                <li><strong>定期审计</strong>：每季度进行积分审计</li>
+                <li><strong>随机抽查</strong>：对积分申请进行随机抽查</li>
+                <li><strong>系统监控</strong>：通过系统监控异常积分行为</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>第八章 系统支撑</h2>
+            
+            <h3>第二十四条 技术平台</h3>
+            <ol>
+                <li><strong>积分管理系统</strong>：提供积分申请、审核、查询等功能</li>
+                <li><strong>学习管理系统</strong>：集成学习资源和进度跟踪</li>
+                <li><strong>项目管理系统</strong>：关联项目参与度和贡献度</li>
+                <li><strong>数据分析系统</strong>：提供积分趋势分析和效果评估</li>
+            </ol>
+
+            <h3>第二十五条 数据安全</h3>
+            <ol>
+                <li><strong>权限管理</strong>：严格控制系统访问权限</li>
+                <li><strong>数据备份</strong>：定期备份积分数据</li>
+                <li><strong>隐私保护</strong>：保护员工个人信息安全</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>第九章 效果评估</h2>
+            
+            <h3>第二十六条 评估指标</h3>
+            <ol>
+                <li><strong>参与度指标</strong>：活跃用户数、申请频次等</li>
+                <li><strong>能力指标</strong>：AI知识测试分数、认证通过率等</li>
+                <li><strong>协作指标</strong>：跨部门项目数量、知识分享频次等</li>
+                <li><strong>创新指标</strong>：创新方案数量、专利申请数等</li>
+            </ol>
+
+            <h3>第二十七条 评估周期</h3>
+            <ol>
+                <li><strong>月度分析</strong>：积分运营小组进行月度数据分析</li>
+                <li><strong>季度评估</strong>：AI积分管理委员会进行季度效果评估</li>
+                <li><strong>年度总结</strong>：AI专家评审团进行年度全面评估</li>
+            </ol>
+        </div>
+
+        <div class="card">
+            <h2>第十章 附则</h2>
+            
+            <h3>第二十八条 制度修订</h3>
+            <p>本办法由AI积分管理委员会负责解释和修订，重大修订需经公司管理层批准。</p>
+
+            <h3>第二十九条 实施时间</h3>
+            <p>本办法自发布之日起施行，试行期为6个月。</p>
+
+            <h3>第三十条 其他事项</h3>
+            <p>本办法未尽事宜，由AI积分管理委员会研究决定。</p>
+        </div>
+
+    </div>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-info">
+                <p><strong>制定部门：</strong> 效率工程中心</p>
+                <p><strong>发布日期：</strong> 2025年07月</p>
+                <p><strong>版本号：</strong> V1.0</p>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 效率工程中心. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
